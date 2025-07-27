@@ -14,7 +14,8 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
 - Make sure all guidance in the Copilot Instructions file is updated with any relevant changes, including to project structure and scripts, and programming guidance
 
 ### Code formatting requirements
-
+- Every function should have docstrings or the language equivalent
+- Before imports or any code, add a comment block that explains the purpose of the file.
 - When writing Python, you must use type hints for return values and function parameters.
 
 ### Python and Flask Patterns
