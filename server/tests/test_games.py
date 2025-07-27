@@ -168,5 +168,67 @@ class TestGamesRoutes(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertEqual(data['error'], "Game not found")
 
+    def test_filter_games_by_publisher(self) -> None:
+        """Test filtering games by publisher"""
+        # Get the first publisher's ID
+        publishers_response = self.client.get('/api/publishers')
+        publishers = self._get_response_data(publishers_response)
+        publisher_id = publishers[0]['id']
+
+        # Act
+        response = self.client.get(f'{self.GAMES_API_PATH}?publisher_id={publisher_id}')
+        data = self._get_response_data(response)
+        
+        # Assert
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(data) > 0)
+        self.assertEqual(data[0]['publisher']['id'], publisher_id)
+
+    def test_filter_games_by_category(self) -> None:
+        """Test filtering games by category"""
+        # Get the first category's ID
+        categories_response = self.client.get('/api/categories')
+        categories = self._get_response_data(categories_response)
+        category_id = categories[0]['id']
+
+        # Act
+        response = self.client.get(f'{self.GAMES_API_PATH}?category_id={category_id}')
+        data = self._get_response_data(response)
+        
+        # Assert
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(data) > 0)
+        self.assertEqual(data[0]['category']['id'], category_id)
+
+    def test_filter_games_combined(self) -> None:
+        """Test filtering games by both publisher and category"""
+        # Get first publisher and category IDs
+        publishers_response = self.client.get('/api/publishers')
+        categories_response = self.client.get('/api/categories')
+        publishers = self._get_response_data(publishers_response)
+        categories = self._get_response_data(categories_response)
+        
+        # Find the publisher and category that we know has a matching game
+        # In our test data, the first game uses publisher[0] and category[0]
+        publisher_id = publishers[0]['id']  # DevGames Inc
+        category_id = categories[0]['id']   # Strategy - matching our "Pipeline Panic" game
+
+        # Act
+        # Get all games first to debug
+        all_response = self.client.get(self.GAMES_API_PATH)
+        all_data = self._get_response_data(all_response)
+        
+        response = self.client.get(
+            f'{self.GAMES_API_PATH}?publisher_id={publisher_id}&category_id={category_id}'
+        )
+        data = self._get_response_data(response)
+        
+        # Assert
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(data) > 0)
+        self.assertEqual(data[0]['title'], "Pipeline Panic")  # Verify we got the expected game
+        self.assertEqual(data[0]['publisher']['id'], publisher_id)
+        self.assertEqual(data[0]['category']['id'], category_id)
+
 if __name__ == '__main__':
     unittest.main()
